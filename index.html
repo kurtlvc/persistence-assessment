@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PersistenCe Course Reviewer</title>
+<style>
+  :root{
+    --green-950:#0f2e1e;
+    --green-900:#153b27;
+    --green-800:#1b4d33;
+    --green-700:#20603f;
+    --green-100:#e7f0ea;
+    --green-050:#f2f6f3;
+    --gold:#d4a017;
+    --gold-dark:#b8860b;
+    --cream:#f5f3ee;
+    --paper:#fffdf7;
+    --ink:#1f2b24;
+    --muted:#6b7970;
+    --line:#dfe6e0;
+    --red:#b3452c;
+    --red-bg:#fbeae4;
+    --good:#1b4d33;
+    --good-bg:#e6f2ea;
+    --fg-accent:#1b4d33;
+    --surface-strong:#fff;
+    --option-ink:#3c463f;
+    --header-ink:#e7f0ea;
+    --brand-mark-bg:#f2f6f3;
+    --brand-mark-ink:#153b27;
+    --radius:10px;
+    --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+  body.dark{
+    --green-100:#1c2e24;
+    --green-050:#17251d;
+    --gold:#e2b53d;
+    --gold-dark:#f0c65c;
+    --cream:#0f1613;
+    --paper:#18241f;
+    --ink:#e8ede9;
+    --muted:#93a89d;
+    --line:#2a3a32;
+    --red:#e0917a;
+    --red-bg:#3a2019;
+    --good:#7fd9a9;
+    --good-bg:#173327;
+    --fg-accent:#7fd9a9;
+    --surface-strong:#22312a;
+    --option-ink:#c9d4ce;
+    --header-ink:#f5fff8;
+    --brand-mark-bg:#e7f0ea;
+    --brand-mark-ink:#0f2e1e;
+  }
+  body.dark ::selection{background:var(--green-800);color:#eaf5ee;}
+  body{transition:background .2s ease, color .2s ease;}
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--sans);
+    background:var(--cream);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  ::selection{background:var(--gold);color:var(--green-950);}
+
+  /* ---------- HEADER ---------- */
+  header.topbar{
+    background:linear-gradient(180deg,var(--green-900),var(--green-950));
+    border-bottom:3px solid var(--gold);
+    padding:14px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{
+    width:38px;height:38px;border-radius:9px;background:var(--brand-mark-bg);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    border:1px solid rgba(255,255,255,.18);
+  }
+  .brand-mark svg{width:22px;height:22px;stroke:var(--brand-mark-ink);}
+  .brand-text .name{
+    font-family:var(--serif);
+    font-size:20px;font-weight:700;color:var(--green-050);
+    letter-spacing:.2px;line-height:1.1;
+  }
+  .brand-text .name .accent{color:var(--gold);}
+  .brand-text .sub{
+    font-size:10.5px;letter-spacing:2.2px;color:#9db8a8;font-weight:600;margin-top:2px;
+  }
+  body.dark .brand-text .name{color:#f5fff8;}
+  body.dark .brand-text .name .accent{color:#f5cf63;}
+  body.dark .brand-text .sub{color:#b9cfc2;}
+  .header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .pill-stat{
+    font-size:13px;color:#cfe3d6;background:rgba(255,255,255,.06);
+    padding:6px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.15);
+    white-space:nowrap;
+  }
+  .pill-stat.timer-low{background:rgba(179,69,44,.25);border-color:#d98a6f;color:#ffe1d4;font-weight:700;}
+
+  /* ---------- SETTINGS PANEL ---------- */
+  .settings-card{padding:22px 24px;max-width:620px;margin:0 auto 24px;}
+  .settings-card h4{font-family:var(--serif);font-size:16px;color:var(--fg-accent);margin:0 0 4px;}
+  .settings-card > p{font-size:12.5px;color:var(--muted);margin:0 0 4px;}
+  .settings-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+  .settings-row:last-of-type{border-bottom:none;padding-bottom:2px;}
+  .settings-row-text{max-width:340px;}
+  .settings-row-label{font-weight:700;font-size:13.5px;color:var(--ink);}
+  .settings-row-desc{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4;}
+  .toggle{position:relative;width:42px;height:23px;border-radius:14px;background:var(--line);cursor:pointer;transition:background .15s;flex-shrink:0;border:none;padding:0;}
+  .toggle.on{background:var(--green-800);}
+  .toggle .knob{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.25);}
+  .toggle.on .knob{left:21px;}
+  .segmented{display:flex;gap:8px;flex-wrap:wrap;}
+  .seg-btn{padding:7px 13px;border-radius:8px;border:1.5px solid var(--line);background:var(--paper);font-size:12.5px;font-weight:700;color:var(--ink);}
+  .seg-btn.active{background:var(--green-800);color:#fff;border-color:var(--green-800);}
+  .timer-config-row{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12.5px;color:var(--ink);}
+  .timer-config-row input[type=number]{
+    width:70px;padding:6px 8px;border:1.5px solid var(--line);border-radius:6px;font-size:13px;font-family:var(--sans);
+  }
+  .timer-note{font-size:11.5px;color:var(--muted);margin-top:8px;font-style:italic;}
+  button{font-family:var(--sans);cursor:pointer;}
+  .btn{
+    border-radius:8px;padding:9px 16px;font-size:14px;font-weight:600;
+    border:1.5px solid transparent;transition:transform .08s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--green-800);color:#fff;}
+  .btn-primary:hover{background:var(--green-700);}
+  .btn-primary:disabled{background:#a9bdb1;cursor:not-allowed;transform:none;}
+  .btn-ghost-dark{background:transparent;color:var(--header-ink);border-color:rgba(255,255,255,.4);}
+  .btn-ghost-dark:hover{background:rgba(255,255,255,.08);}
+  .btn-outline{background:var(--paper);color:var(--fg-accent);border-color:var(--fg-accent);}
+  .btn-outline:hover{background:var(--green-050);}
+  .btn-text{background:none;border:none;color:var(--fg-accent);font-weight:600;font-size:14px;text-decoration:underline;padding:4px;}
+
+  .theme-toggle{
+    display:inline-flex;align-items:center;gap:7px;
+    border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.07);
+    color:#eef6f0;border-radius:20px;padding:7px 11px;font-size:12.5px;font-weight:700;
+    white-space:nowrap;
+  }
+  .theme-toggle:hover{background:rgba(255,255,255,.13);}
+  .theme-icon{font-size:14px;line-height:1;}
+  .mark-size{
+    display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+  }
+  .mark-size .seg-btn{padding:6px 10px;font-size:12px;}
+
+  /* ---------- LAYOUT SHELL ---------- */
+  main{flex:1;width:100%;padding:32px 20px 60px;display:flex;justify-content:center;}
+  .stage{width:100%;max-width:1080px;}
+  footer.foot{
+    text-align:center;font-size:12px;color:var(--muted);padding:16px;
+    border-top:1px solid var(--line);background:var(--green-050);
+  }
+  footer.foot b{color:var(--fg-accent);}
+
+  .card{
+    background:var(--paper);border:1px solid var(--line);border-radius:14px;
+    box-shadow:0 1px 3px rgba(20,40,30,.06);
+  }
+
+  /* ---------- IMPORT SCREEN ---------- */
+  .import-wrap{max-width:620px;margin:0 auto;}
+  .import-card{padding:32px;}
+  .import-card h1{
+    font-family:var(--serif);font-size:24px;color:var(--fg-accent);margin:0 0 6px;
+  }
+  .import-card p.lead{color:var(--muted);margin:0 0 22px;font-size:14.5px;}
+  .dropzone{
+    border:2px dashed var(--line);border-radius:12px;background:var(--green-050);
+    padding:44px 20px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;
+  }
+  .dropzone.drag-over{border-color:var(--fg-accent);background:var(--green-100);}
+  .dropzone svg{width:30px;height:30px;color:var(--fg-accent);margin-bottom:10px;}
+  .dropzone .dz-title{font-weight:700;color:var(--fg-accent);font-size:15.5px;margin-bottom:4px;}
+  .dropzone .dz-sub{font-size:12.5px;color:var(--muted);}
+  .divider-row{display:flex;align-items:center;gap:14px;margin:22px 0;color:var(--muted);font-size:11.5px;font-weight:700;letter-spacing:1px;}
+  .divider-row::before,.divider-row::after{content:"";flex:1;height:1px;background:var(--line);}
+  .sample-btn-wrap{display:flex;justify-content:center;}
+  details.fmt{margin-top:20px;border-top:1px solid var(--line);padding-top:14px;}
+  details.fmt summary{cursor:pointer;font-weight:700;color:var(--fg-accent);font-size:13.5px;list-style:none;}
+  details.fmt summary::-webkit-details-marker{display:none;}
+  details.fmt summary::before{content:"▶";display:inline-block;margin-right:7px;font-size:9px;transition:transform .15s;}
+  details.fmt[open] summary::before{transform:rotate(90deg);}
+  details.fmt pre{
+    background:var(--green-950);color:#cfe8d9;padding:14px;border-radius:8px;
+    font-size:12px;overflow-x:auto;margin-top:12px;line-height:1.5;
+  }
+  .import-error{
+    margin-top:14px;background:var(--red-bg);color:var(--red);border:1px solid #e6c2b3;
+    padding:10px 12px;border-radius:8px;font-size:13px;
+  }
+  .file-input{display:none;}
+
+  /* ---------- MODE PICKER ---------- */
+  .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:820px;margin:0 auto;}
+  @media (max-width:680px){.mode-grid{grid-template-columns:1fr;}}
+  .mode-card{padding:26px;display:flex;flex-direction:column;gap:14px;}
+  .mode-card .preview{
+    height:120px;border-radius:9px;background:var(--green-050);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  .mode-card h3{font-family:var(--serif);font-size:18px;color:var(--fg-accent);margin:0;}
+  .mode-card p{font-size:13.5px;color:var(--muted);margin:0;line-height:1.5;flex:1;}
+  .mode-card-header{text-align:center;margin-bottom:6px;}
+  .mode-card-header h2{font-family:var(--serif);font-size:22px;color:var(--fg-accent);margin:0 0 4px;}
+  .mode-card-header p{color:var(--muted);font-size:14px;margin:0;}
+
+  /* mini bubble preview */
+  .mini-bubble-row{display:flex;gap:6px;align-items:center;}
+  .mini-bubble{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--fg-accent);}
+  .mini-bubble.filled{background:var(--fg-accent);}
+  .mini-sheet{display:flex;flex-direction:column;gap:7px;}
+
+  /* ---------- CISCO-STYLE EXAM ---------- */
+  .progress-track{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin-bottom:8px;}
+  .progress-fill{height:100%;background:var(--fg-accent);border-radius:6px;transition:width .25s ease;}
+  .progress-label{text-align:right;font-size:12.5px;color:var(--muted);margin-bottom:18px;}
+  .overview-card{padding:18px 20px;margin-bottom:18px;}
+  .overview-title{font-size:11px;letter-spacing:1.4px;font-weight:700;color:var(--muted);margin-bottom:12px;}
+  .overview-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(38px,1fr));
+    gap:7px;
+    max-height:260px;
+    overflow-y:auto;
+    padding:2px;
+  }
+  .overview-grid .ov-btn{width:100%;}
+
+  .ov-btn{
+    width:38px;height:38px;border-radius:7px;border:1.5px solid var(--line);background:var(--paper);
+    font-weight:700;font-size:13.5px;color:var(--ink);display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .ov-btn.current{background:var(--green-800);border-color:var(--green-800);color:#fff;}
+  .ov-btn.answered:not(.current){border-color:var(--green-700);color:var(--fg-accent);background:var(--green-050);}
+  .ov-btn.flagged::after{
+    content:"";position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--gold);
+  }
+  .q-card{padding:26px 28px 22px;}
+  .q-topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+  .q-topline .q-count{font-weight:700;font-size:15px;color:var(--fg-accent);}
+  .q-topline .id-badge{
+    background:var(--green-050);color:var(--fg-accent);font-size:11.5px;font-weight:700;
+    padding:3px 9px;border-radius:20px;margin-left:8px;
+  }
+  .flag-btn{
+    width:36px;height:36px;border-radius:8px;border:1.5px solid var(--line);background:#fff;
+    display:flex;align-items:center;justify-content:center;color:var(--muted);
+  }
+  .flag-btn.on{border-color:var(--gold);color:var(--gold-dark);background:#fdf6e3;}
+  .q-text{font-size:17px;line-height:1.5;color:var(--ink);margin-bottom:22px;font-weight:600;}
+  .option-row{
+    display:flex;align-items:center;gap:14px;border:1.5px solid var(--line);border-radius:10px;
+    padding:13px 16px;margin-bottom:11px;transition:border-color .12s,background .12s;
+  }
+  .option-row:hover{border-color:#b9c9bf;}
+  .option-row.selected{border-color:var(--fg-accent);background:var(--green-050);}
+  .option-row.correct{border-color:var(--good);background:var(--good-bg);}
+  .option-row.incorrect{border-color:var(--red);background:var(--red-bg);}
+  .opt-letter{
+    width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:var(--muted);
+  }
+  .option-row.selected .opt-letter{border-color:var(--fg-accent);color:var(--fg-accent);background:var(--green-050);}
+  .option-row.correct .opt-letter{border-color:var(--good);background:var(--good);color:#fff;}
+  .option-row.incorrect .opt-letter{border-color:var(--red);background:var(--red);color:#fff;}
+  .opt-text{font-size:14.5px;color:var(--ink);}
+  .insight-box{
+    margin-top:6px;margin-bottom:18px;background:var(--green-050);border-left:3px solid var(--fg-accent);
+    padding:12px 14px;border-radius:0 8px 8px 0;font-size:13.5px;color:var(--fg-accent);line-height:1.55;
+  }
+  .q-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap;}
+  .q-actions .right-group{display:flex;gap:10px;}
+  .kbd-hint{
+    text-align:center;font-size:11.5px;color:var(--muted);margin-top:16px;padding-top:14px;
+    border-top:1px solid var(--line);display:flex;justify-content:center;gap:8px;flex-wrap:wrap;
+  }
+  kbd{
+    background:var(--green-050);border:1px solid var(--line);border-radius:4px;
+    padding:1px 6px;font-size:11px;font-family:var(--sans);color:var(--fg-accent);font-weight:700;
+  }
+
+  /* ---------- PAPER / BUBBLE MODE ---------- */
+  .paper-shell{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;align-items:start;}
+  @media (max-width:900px){.paper-shell{grid-template-columns:1fr;}}
+  .paper-panel{padding:0;overflow:hidden;}
+  .paper-panel-head{
+    background:var(--green-900);color:var(--header-ink);padding:12px 18px;font-size:12px;
+    letter-spacing:1.4px;font-weight:700;display:flex;justify-content:space-between;align-items:center;
+  }
+  .paper-panel-body{padding:22px 24px;max-height:74vh;overflow-y:auto;background:var(--paper);}
+  .qp-item{margin-bottom:26px;}
+  .qp-item:last-child{margin-bottom:4px;}
+  .qp-num{font-weight:700;color:var(--fg-accent);font-size:14px;margin-bottom:6px;}
+  .qp-text{font-size:14.5px;line-height:1.55;color:var(--ink);margin-bottom:10px;}
+  .qp-opt{font-size:13.5px;color:var(--option-ink);margin:3px 0 3px 4px;line-height:1.5;}
+  .qp-opt b{color:var(--fg-accent);margin-right:6px;}
+
+  .sheet-panel{padding:0;overflow:hidden;position:sticky;top:16px;}
+  .sheet-head{
+    background:var(--green-900);color:var(--header-ink);padding:12px 18px;font-size:12px;
+    letter-spacing:1.4px;font-weight:700;display:flex;justify-content:space-between;align-items:center;
+  }
+  .sheet-info{
+    display:flex;justify-content:space-between;padding:12px 18px;background:var(--green-050);
+    font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);
+  }
+  .sheet-body{padding:18px;max-height:60vh;overflow-y:auto;background:var(--paper);}
+  .bubble-row{display:grid;grid-template-columns:34px repeat(4,minmax(28px,1fr));align-items:center;gap:7px;padding:5px 2px;font-size:13px;}
+  .bubble-row .num{width:auto;text-align:right;color:var(--muted);font-weight:700;font-size:12.5px;flex-shrink:0;}
+  .bubble{
+    width:100%;max-width:30px;aspect-ratio:1;border-radius:50%;border:1.6px solid var(--line);background:var(--paper);
+    display:flex;align-items:center;justify-content:center;font-size:var(--mark-font,11px);font-weight:700;color:var(--muted);
+    flex-shrink:0;justify-self:center;
+  }
+
+  .bubble:hover{border-color:var(--fg-accent);}
+  .bubble.filled{background:var(--green-800);border-color:var(--green-800);color:#fff;}
+
+  /* Dark-mode contrast: keep the answer sheet readable at a glance. */
+  body.dark .sheet-head{background:#0b2417;color:#f5fff8;}
+  body.dark .sheet-info{background:#1d3027;color:#c8d8cf;border-bottom-color:#3a4f44;}
+  body.dark .sheet-body{background:#111b16;}
+  body.dark .bubble-row{color:#e5eee9;}
+  body.dark .bubble-row .num{color:#b9cbc1;}
+  body.dark .bubble{
+    border-color:#6b8377;
+    background:#1a2821;
+    color:#dce9e2;
+  }
+  body.dark .bubble:hover{border-color:#f5cf63;background:#24372d;}
+  body.dark .bubble.filled{
+    background:#2b8a5b;
+    border-color:#8be0b3;
+    color:#fff;
+    box-shadow:0 0 0 2px rgba(139,224,179,.16);
+  }
+  .sheet-footer{padding:16px 18px;border-top:1px solid var(--line);}
+  .sheet-progress-txt{font-size:12px;color:var(--muted);margin-bottom:10px;text-align:center;}
+
+  /* ---------- RESULTS ---------- */
+  .score-card{padding:34px;text-align:center;margin-bottom:24px;}
+  .score-num{font-family:var(--serif);font-size:52px;color:var(--fg-accent);font-weight:700;line-height:1;}
+  .score-sub{color:var(--muted);font-size:14.5px;margin-top:8px;}
+  .score-bar-wrap{max-width:340px;margin:18px auto 0;}
+  .review-item{padding:20px 22px;margin-bottom:14px;}
+  .review-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;}
+  .review-q{font-weight:600;font-size:15px;color:var(--ink);line-height:1.5;}
+  .status-chip{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;flex-shrink:0;white-space:nowrap;}
+  .status-chip.right{background:var(--good-bg);color:var(--good);}
+  .status-chip.wrong{background:var(--red-bg);color:var(--red);}
+  .status-chip.skip{background:var(--green-050);color:var(--muted);}
+  .ans-line{font-size:13.5px;margin:3px 0;color:var(--option-ink);}
+  .ans-line b{color:var(--fg-accent);}
+  .actions-row{display:flex;justify-content:center;gap:12px;margin-top:24px;flex-wrap:wrap;}
+
+  .hidden{display:none !important;}
+  .center-note{text-align:center;color:var(--muted);font-size:14px;padding:40px;}
+
+  /* ---------- RESPONSIVE 100+ QUESTION SUPPORT ---------- */
+  @media (max-width:900px){
+    main{padding:20px 14px 42px;}
+    .paper-shell{grid-template-columns:1fr;}
+    .sheet-panel{position:static;}
+    .paper-panel-body{max-height:none;}
+    .sheet-body{max-height:52vh;}
+  }
+  @media (max-width:680px){
+    header.topbar{padding:11px 14px;gap:10px;}
+    .brand{gap:9px;}
+    .brand-mark{width:34px;height:34px;}
+    .brand-text .name{font-size:18px;}
+    .brand-text .sub{font-size:9px;letter-spacing:1.7px;}
+    .header-actions{width:100%;justify-content:flex-end;}
+    .pill-stat,.theme-toggle,.header-actions .btn{font-size:11.5px;padding:6px 9px;}
+    .q-card{padding:20px 16px 18px;}
+    .q-text{font-size:16px;}
+    .option-row{padding:12px 12px;gap:10px;}
+    .opt-text{font-size:14px;}
+    .overview-card{padding:14px;}
+    .overview-grid{
+      grid-template-columns:repeat(auto-fill,minmax(34px,1fr));
+      max-height:210px;
+      gap:6px;
+    }
+    .ov-btn{height:34px;font-size:12px;}
+    .paper-panel-body{padding:18px 15px;}
+    .sheet-body{padding:14px 12px;max-height:58vh;}
+    .bubble-row{grid-template-columns:31px repeat(4,minmax(26px,1fr));gap:5px;}
+    .bubble{max-width:32px;}
+    .q-actions{align-items:stretch;}
+    .q-actions > .btn,.q-actions .right-group,.q-actions .right-group .btn{flex:1;}
+    .q-actions .right-group{min-width:0;}
+  }
+  @media (max-width:430px){
+    .brand-text .sub{display:none;}
+    .theme-toggle .theme-label{display:none;}
+    .q-actions{flex-direction:column;}
+    .q-actions .right-group{width:100%;}
+    .q-actions > .btn{width:100%;}
+    .q-actions .right-group .btn{flex:1;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color:var(--brand-mark-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>
+    </div>
+    <div class="brand-text">
+      <div class="name"><span><span class="accent">P</span>ersiste<span class="accent">n</span><span class="accent">C</span><span>e</span></div>
+      <div class="sub">COURSE REVIEWER</div>
+    </div>
+  </div>
+  <div class="header-actions" id="headerActions"></div>
+</header>
+
+<main><div class="stage" id="stage"></div></main>
+
+<footer class="foot">
+  <b>PersistenCe Course Reviewer</b> · Offline study tool · Your quiz data stays in your browser
+</footer>
+
+<input type="file" id="fileInput" class="file-input" accept="application/json,.json">
+
+<script>
+/* ============================================================
+   STATE
+============================================================ */
+const state = {
+  screen: 'import',        // import | mode-select | exam-cisco | exam-paper | results
+  bank: [],                 // question objects
+  answers: {},               // id -> selected letter
+  flags: {},                 // id -> bool
+  current: 0,
+  checked: {},                // id -> bool (cisco "check answer" revealed)
+  darkMode: false,
+  answerMarkSize: 'medium', // small | medium | large
+  settings: {
+    checkAnswerEnabled: true,  // Assessment Mode: allow revealing correctness per question
+    timerMode: 'off',           // 'off' | 'perQuestion' | 'whole'
+    perQuestionSeconds: 60,
+    wholeMinutes: 30,
+    randomizeQuestions: true,   // shuffle question order each time a session starts
+  },
+  sessionBank: [],              // the ordered (possibly shuffled) copy of bank actually used this session
+  wholeRemaining: null,        // seconds left, whole-assessment timer
+  perQRemaining: null,         // seconds left, current question (per-question timer)
+  perQLastIndex: null,         // last question index the per-question timer was reset for
+};
+
+/* ---------------- THEME / DISPLAY ---------------- */
+function applyTheme(){
+  document.body.classList.toggle('dark', !!state.darkMode);
+  document.documentElement.style.setProperty(
+    '--mark-font',
+    state.answerMarkSize === 'small' ? '10px' : state.answerMarkSize === 'large' ? '13px' : '11px'
+  );
+}
+function toggleDarkMode(){
+  state.darkMode = !state.darkMode;
+  try{ localStorage.setItem('persistence:dark-mode', state.darkMode ? '1' : '0'); }catch(e){}
+  applyTheme();
+  render();
+}
+function loadDisplayPreferences(){
+  try{
+    state.darkMode = localStorage.getItem('persistence:dark-mode') === '1';
+    const savedSize = localStorage.getItem('persistence:answer-mark-size');
+    if(['small','medium','large'].includes(savedSize)) state.answerMarkSize = savedSize;
+  }catch(e){}
+  applyTheme();
+}
+
+/* ---------------- TIMER ENGINE ---------------- */
+let tickInterval = null;
+
+function stopTimer(){
+  if(tickInterval){ clearInterval(tickInterval); tickInterval = null; }
+}
+
+function startTimerForMode(mode){
+  stopTimer();
+  const s = state.settings;
+  state.wholeRemaining = null;
+  state.perQRemaining = null;
+  state.perQLastIndex = null;
+  if(s.timerMode === 'off') return;
+
+  if(s.timerMode === 'whole'){
+    state.wholeRemaining = Math.max(1, s.wholeMinutes) * 60;
+  } else if(s.timerMode === 'perQuestion'){
+    if(mode === 'exam-cisco'){
+      state.perQRemaining = Math.max(1, s.perQuestionSeconds);
+      state.perQLastIndex = state.current;
+    } else {
+      // Per-question timing has no meaning on a single-page bubble sheet —
+      // fall back to one combined budget for the whole sheet instead.
+      state.wholeRemaining = Math.max(1, s.perQuestionSeconds) * Math.max(1, state.sessionBank.length);
+    }
+  }
+  tickInterval = setInterval(tick, 1000);
+}
+
+function tick(){
+  const s = state.settings;
+  if(state.screen === 'exam-cisco' && s.timerMode === 'perQuestion'){
+    state.perQRemaining--;
+    if(state.perQRemaining <= 0){
+      // structural change (question advances or quiz ends) -> full render needed
+      if(state.current < state.sessionBank.length - 1){
+        state.current++;
+        state.perQRemaining = s.perQuestionSeconds;
+        state.perQLastIndex = state.current;
+        render();
+      } else {
+        stopTimer();
+        finishQuiz();
+      }
+      return;
+    }
+  } else if(state.wholeRemaining !== null){
+    state.wholeRemaining--;
+    if(state.wholeRemaining <= 0){
+      stopTimer();
+      finishQuiz();
+      return;
+    }
+  } else {
+    return;
+  }
+  // no structural change this tick — just update the timer pill in place so
+  // we never rebuild the question paper / answer sheet and lose scroll position
+  updateTimerPill();
+}
+
+function updateTimerPill(){
+  const pill = document.getElementById('timerPill');
+  if(!pill) return;
+  const showPerQ = state.screen === 'exam-cisco' && state.settings.timerMode === 'perQuestion';
+  const secs = showPerQ ? state.perQRemaining : state.wholeRemaining;
+  const label = showPerQ ? 'this question' : 'remaining';
+  const low = secs !== null && secs <= 10;
+  pill.textContent = `⏱ ${secs===null?'--:--':formatTime(secs)} ${label}`;
+  pill.classList.toggle('timer-low', low);
+}
+
+function formatTime(totalSeconds){
+  const m = Math.floor(totalSeconds/60);
+  const s = totalSeconds % 60;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function shuffleArray(arr){
+  const copy = arr.slice();
+  for(let i = copy.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function buildSessionBank(){
+  state.sessionBank = state.settings.randomizeQuestions ? shuffleArray(state.bank) : state.bank.slice();
+}
+
+const SAMPLE_QUIZ = [
+  {id:1, question:"A team needs a data structure that retrieves the most recently added item first, with O(1) push and pop. Which structure fits best?", options:{A:"Queue",B:"Stack",C:"Linked List",D:"Binary Search Tree"}, answer:"B", insight:"A stack follows Last-In-First-Out (LIFO) order, so the most recently pushed item is always the first one popped — exactly what's being described here."},
+  {id:2, question:"In a relational database, which normal form primarily eliminates transitive dependencies on the primary key?", options:{A:"First Normal Form (1NF)",B:"Second Normal Form (2NF)",C:"Third Normal Form (3NF)",D:"Boyce-Codd Normal Form (BCNF)"}, answer:"C", insight:"3NF requires that non-key attributes depend only on the primary key, not on other non-key attributes — removing transitive dependencies."},
+  {id:3, question:"A Java-based order service must exchange asynchronous messages with a Python inventory service without either system waiting for the other. Which integration category fits best?", options:{A:"ODBC Driver",B:"Messaging Middleware",C:"ETL Tool",D:"Report Generator"}, answer:"B", insight:"Messaging middleware (e.g. a message queue or broker) decouples producers and consumers so neither service blocks waiting on the other."},
+  {id:4, question:"Which HTTP status code indicates that a request succeeded and a new resource was created as a result?", options:{A:"200 OK",B:"201 Created",C:"204 No Content",D:"302 Found"}, answer:"B", insight:"201 Created specifically signals that the request succeeded and led to the creation of a new resource, often paired with a Location header."},
+  {id:5, question:"In Big-O terms, what is the time complexity of binary search on a sorted array of n elements?", options:{A:"O(n)",B:"O(n log n)",C:"O(log n)",D:"O(1)"}, answer:"C", insight:"Binary search halves the search space on each comparison, giving logarithmic time complexity, O(log n)."},
+  {id:6, question:"Which testing level focuses on verifying that independently developed modules work correctly when combined?", options:{A:"Unit Testing",B:"Integration Testing",C:"Acceptance Testing",D:"Regression Testing"}, answer:"B", insight:"Integration testing checks the interfaces and interactions between modules that were built and unit-tested separately."}
+];
+
+/* ============================================================
+   STORAGE HELPERS (artifact persistent storage)
+============================================================ */
+async function saveBank(bank){
+  try{ await window.storage.set('persistence:last-bank', JSON.stringify(bank)); }catch(e){ /* non-fatal */ }
+}
+async function loadSavedBank(){
+  try{
+    const res = await window.storage.get('persistence:last-bank');
+    if(res && res.value) return JSON.parse(res.value);
+  }catch(e){ /* no saved bank yet */ }
+  return null;
+}
+async function clearSavedBank(){
+  try{ await window.storage.delete('persistence:last-bank'); }catch(e){}
+}
+
+/* ============================================================
+   VALIDATION
+============================================================ */
+function validateBank(data){
+  if(!Array.isArray(data) || data.length === 0) throw new Error('JSON must be a non-empty array of question objects.');
+  data.forEach((q,i)=>{
+    if(typeof q.id === 'undefined') throw new Error(`Question at index ${i} is missing "id".`);
+    if(!q.question || typeof q.question !== 'string') throw new Error(`Question ${q.id} is missing "question" text.`);
+    if(!q.options || typeof q.options !== 'object') throw new Error(`Question ${q.id} is missing "options".`);
+    ['A','B','C','D'].forEach(k=>{ if(!q.options[k]) throw new Error(`Question ${q.id} is missing option "${k}".`); });
+    if(!q.answer || !['A','B','C','D'].includes(q.answer)) throw new Error(`Question ${q.id} has an invalid "answer" (must be A, B, C, or D).`);
+  });
+  return data;
+}
+
+/* ============================================================
+   RENDER ROOT
+============================================================ */
+const stageEl = document.getElementById('stage');
+const headerActions = document.getElementById('headerActions');
+
+function render(){
+  // keep the per-question timer in sync with whichever question is showing
+  // before the header (which displays it) gets built
+  if(state.screen === 'exam-cisco' && state.settings.timerMode === 'perQuestion' && state.perQLastIndex !== state.current){
+    state.perQRemaining = state.settings.perQuestionSeconds;
+    state.perQLastIndex = state.current;
+  }
+
+  headerActions.innerHTML = '';
+  const themeBtn = el('button',{
+    class:'theme-toggle',
+    id:'themeToggle',
+    title: state.darkMode ? 'Switch to light mode' : 'Switch to dark mode',
+    onclick:toggleDarkMode
+  },
+    el('span',{class:'theme-icon'}, state.darkMode ? '☀' : '☾'),
+    el('span',{class:'theme-label'}, state.darkMode ? 'Light' : 'Dark')
+  );
+  headerActions.appendChild(themeBtn);
+
+  if(state.screen !== 'import'){
+    const newBtn = el('button',{class:'btn btn-ghost-dark', onclick:goHome},'New Quiz');
+    headerActions.appendChild(newBtn);
+  }
+  if(state.screen === 'exam-cisco' || state.screen === 'exam-paper'){
+    if(state.settings.timerMode !== 'off'){
+      const showPerQ = state.screen === 'exam-cisco' && state.settings.timerMode === 'perQuestion';
+      const secs = showPerQ ? state.perQRemaining : state.wholeRemaining;
+      const label = showPerQ ? 'this question' : 'remaining';
+      const low = secs !== null && secs <= 10;
+      headerActions.appendChild(el('span',{class:'pill-stat' + (low ? ' timer-low' : ''), id:'timerPill'}, `⏱ ${secs===null?'--:--':formatTime(secs)} ${label}`));
+    }
+    const endBtn = el('button',{class:'btn btn-ghost-dark', onclick:finishQuiz},'End Quiz');
+    headerActions.appendChild(endBtn);
+  }
+
+  stageEl.innerHTML = '';
+  if(state.screen === 'import') stageEl.appendChild(renderImport());
+  else if(state.screen === 'mode-select') stageEl.appendChild(renderModeSelect());
+  else if(state.screen === 'exam-cisco') stageEl.appendChild(renderCisco());
+  else if(state.screen === 'exam-paper') stageEl.appendChild(renderPaper());
+  else if(state.screen === 'results') stageEl.appendChild(renderResults());
+}
+
+function el(tag, attrs={}, ...children){
+  const node = document.createElement(tag);
+  for(const [k,v] of Object.entries(attrs)){
+    if(v === null || v === undefined || v === false) continue; // skip falsy attrs (fixes disabled bug)
+    if(k.startsWith('on') && typeof v === 'function') node.addEventListener(k.slice(2), v);
+    else if(k === 'html') node.innerHTML = v;
+    else node.setAttribute(k, v === true ? '' : v);
+  }
+  children.flat().forEach(c=>{
+    if(c === null || c === undefined) return;
+    node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  });
+  return node;
+}
+
+function goHome(){
+  stopTimer();
+  state.screen = 'import';
+  state.bank = []; state.sessionBank = []; state.answers = {}; state.flags = {}; state.current = 0; state.checked = {};
+  render();
+}
+
+/* ============================================================
+   IMPORT SCREEN
+============================================================ */
+function renderImport(){
+  const wrap = el('div',{class:'import-wrap'});
+  const card = el('div',{class:'card import-card'});
+
+  card.appendChild(el('h1',{},'Import Questions Menu'));
+  card.appendChild(el('p',{class:'lead'},'Import a JSON question bank to begin a review session.'));
+
+  const errorHolder = el('div',{});
+
+  const dz = el('div',{class:'dropzone', id:'dropzone'},
+    el('div',{html:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 8 5-5 5 5"/><path d="M5 21h14"/></svg>`}),
+    el('div',{class:'dz-title'},'Drop your quiz JSON here'),
+    el('div',{class:'dz-sub'},'or click to browse · you can also paste a JSON array (Ctrl+V)')
+  );
+  dz.addEventListener('click', ()=>document.getElementById('fileInput').click());
+  dz.addEventListener('dragover', e=>{ e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', ()=> dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e=>{
+    e.preventDefault(); dz.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if(file) readFile(file, errorHolder);
+  });
+  card.appendChild(dz);
+
+  card.appendChild(el('div',{class:'divider-row'},'OR'));
+  card.appendChild(el('div',{class:'sample-btn-wrap'},
+    el('button',{class:'btn btn-outline', onclick:()=>startWithBank(SAMPLE_QUIZ)}, '▶ Try a sample quiz')
+  ));
+
+  const details = el('details',{class:'fmt'},
+    el('summary',{},'Expected JSON format'),
+    el('pre',{}, JSON.stringify([{
+      id:1,
+      question:"What does CPU stand for?",
+      options:{A:"Central Process Unit",B:"Central Processing Unit",C:"Computer Processing Unit",D:"Central Processor Utility"},
+      answer:"B",
+      insight:"CPU = Central Processing Unit, the primary component that executes instructions."
+    }], null, 2))
+  );
+  card.appendChild(details);
+  card.appendChild(errorHolder);
+
+  // paste support
+  document.addEventListener('paste', pasteHandler);
+  function pasteHandler(e){
+    if(state.screen !== 'import') { document.removeEventListener('paste', pasteHandler); return; }
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    if(text && text.trim().startsWith('[')) tryLoadJSON(text, errorHolder);
+  }
+
+  wrap.appendChild(card);
+  return wrap;
+}
+
+document.getElementById('fileInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(file) readFile(file, document.querySelector('.import-card'));
+  e.target.value = '';
+});
+
+function readFile(file, errorHolder){
+  const reader = new FileReader();
+  reader.onload = ()=> tryLoadJSON(reader.result, errorHolder);
+  reader.onerror = ()=> showImportError(errorHolder, 'Could not read that file. Please try again.');
+  reader.readAsText(file);
+}
+
+function tryLoadJSON(text, errorHolder){
+  try{
+    const data = JSON.parse(text);
+    validateBank(data);
+    startWithBank(data);
+  }catch(err){
+    showImportError(errorHolder, err.message || 'That JSON could not be parsed.');
+  }
+}
+
+function showImportError(holder, msg){
+  const existing = holder.querySelector ? holder.querySelector('.import-error') : null;
+  const box = el('div',{class:'import-error'}, `⚠ ${msg}`);
+  if(holder.classList && holder.classList.contains('import-card')){
+    const old = holder.querySelector('.import-error');
+    if(old) old.remove();
+    holder.appendChild(box);
+  } else {
+    holder.innerHTML = '';
+    holder.appendChild(box);
+  }
+}
+
+function startWithBank(bank){
+  state.bank = bank;
+  state.answers = {}; state.flags = {}; state.checked = {}; state.current = 0;
+  saveBank(bank);
+  state.screen = 'mode-select';
+  render();
+}
+
+/* ============================================================
+   MODE SELECT SCREEN
+============================================================ */
+function renderSettingsPanel(){
+  const s = state.settings;
+  const card = el('div',{class:'card settings-card'});
+  card.appendChild(el('h4',{},'Exam Settings'));
+  card.appendChild(el('p',{},'Configure before you start — settings apply for this session.'));
+
+  // Check Answer toggle
+  const caRow = el('div',{class:'settings-row'});
+  caRow.appendChild(el('div',{class:'settings-row-text'},
+    el('div',{class:'settings-row-label'},'Check Answer button'),
+    el('div',{class:'settings-row-desc'},'Reveal correctness and insight per question in Assessment Mode. When off, answers are only revealed at the end.')
+  ));
+  const caToggle = el('button',{class:'toggle' + (s.checkAnswerEnabled ? ' on' : ''), onclick:()=>{ s.checkAnswerEnabled = !s.checkAnswerEnabled; render(); }}, el('div',{class:'knob'}));
+  caRow.appendChild(caToggle);
+  card.appendChild(caRow);
+
+  // Randomize order toggle
+  const randRow = el('div',{class:'settings-row'});
+  randRow.appendChild(el('div',{class:'settings-row-text'},
+    el('div',{class:'settings-row-label'},'Randomize question order'),
+    el('div',{class:'settings-row-desc'},'Shuffle the order each time you start a session (default). Turn off to keep the order from your imported JSON.')
+  ));
+  const randToggle = el('button',{class:'toggle' + (s.randomizeQuestions ? ' on' : ''), onclick:()=>{ s.randomizeQuestions = !s.randomizeQuestions; render(); }}, el('div',{class:'knob'}));
+  randRow.appendChild(randToggle);
+  card.appendChild(randRow);
+
+  // Timer
+  const timerRow = el('div',{class:'settings-row', style:'flex-direction:column;align-items:stretch;'});
+  timerRow.appendChild(el('div',{class:'settings-row-text', style:'max-width:none;margin-bottom:10px;'},
+    el('div',{class:'settings-row-label'},'Timer'),
+    el('div',{class:'settings-row-desc'},'Set a time limit, or leave it off for untimed review.')
+  ));
+  const seg = el('div',{class:'segmented'});
+  [['off','Off'],['perQuestion','Per question'],['whole','Whole assessment']].forEach(([val,label])=>{
+    seg.appendChild(el('button',{class:'seg-btn' + (s.timerMode===val ? ' active' : ''), onclick:()=>{ s.timerMode = val; render(); }}, label));
+  });
+  timerRow.appendChild(seg);
+
+  if(s.timerMode === 'perQuestion'){
+    const row = el('div',{class:'timer-config-row'},
+      el('span',{},'Seconds per question:'),
+      el('input',{type:'number', min:'5', step:'5', value:String(s.perQuestionSeconds), oninput:(e)=>{ const v=parseInt(e.target.value,10); s.perQuestionSeconds = isNaN(v)||v<5 ? 5 : v; }})
+    );
+    timerRow.appendChild(row);
+    timerRow.appendChild(el('div',{class:'timer-note'},'Note: the Answer Sheet layout shows all questions at once, so on that layout this becomes one combined timer (seconds × question count) instead.'));
+  } else if(s.timerMode === 'whole'){
+    const row = el('div',{class:'timer-config-row'},
+      el('span',{},'Total minutes:'),
+      el('input',{type:'number', min:'1', step:'1', value:String(s.wholeMinutes), oninput:(e)=>{ const v=parseInt(e.target.value,10); s.wholeMinutes = isNaN(v)||v<1 ? 1 : v; }})
+    );
+    timerRow.appendChild(row);
+  }
+  card.appendChild(timerRow);
+
+  // Answer sheet marking size
+  const markRow = el('div',{class:'settings-row'});
+  markRow.appendChild(el('div',{class:'settings-row-text'},
+    el('div',{class:'settings-row-label'},'Answer Sheet marking size'),
+    el('div',{class:'settings-row-desc'},'Adjust the A–D bubble labels for easier reading and tapping on small screens.')
+  ));
+  const markSeg = el('div',{class:'segmented mark-size'});
+  [['small','Small'],['medium','Medium'],['large','Large']].forEach(([val,label])=>{
+    markSeg.appendChild(el('button',{
+      class:'seg-btn' + (state.answerMarkSize===val ? ' active' : ''),
+      onclick:()=>{
+        state.answerMarkSize = val;
+        try{ localStorage.setItem('persistence:answer-mark-size', val); }catch(e){}
+        applyTheme();
+        render();
+      }
+    },label));
+  });
+  markRow.appendChild(markSeg);
+  card.appendChild(markRow);
+
+  return card;
+}
+
+function renderModeSelect(){
+  const wrap = el('div',{});
+  wrap.appendChild(el('div',{class:'mode-card-header'},
+    el('h2',{},'Choose your review format'),
+    el('p',{}, `${state.bank.length} question${state.bank.length===1?'':'s'} loaded · pick how you'd like to answer them`)
+  ));
+
+  wrap.appendChild(renderSettingsPanel());
+
+  const grid = el('div',{class:'mode-grid'});
+
+  // Bubble sheet card
+  const bubblePreview = el('div',{class:'preview'},
+    el('div',{class:'mini-sheet'},
+      bubbleRowPreview(true), bubbleRowPreview(false), bubbleRowPreview(true)
+    )
+  );
+  const bubbleCard = el('div',{class:'card mode-card'},
+    bubblePreview,
+    el('h3',{},'Answer Sheet Mode'),
+    el('p',{},'A printed-style question paper alongside a scantron answer sheet. Shade your bubbles, then submit the whole sheet for grading — just like exam day.'),
+    el('button',{class:'btn btn-primary', onclick:()=>enterMode('exam-paper')},'Start Answer Sheet')
+  );
+
+  // Cisco card
+  const ciscoPreview = el('div',{class:'preview'}, ciscoPreviewSVG());
+  const ciscoCard = el('div',{class:'card mode-card'},
+    ciscoPreview,
+    el('h3',{},'Assessment Mode'),
+    el('p',{},'One question at a time with a progress bar, question overview, and instant feedback — styled like a Cisco-style certification exam.'),
+    el('button',{class:'btn btn-primary', onclick:()=>enterMode('exam-cisco')},'Start Assessment')
+  );
+
+  grid.appendChild(bubbleCard);
+  grid.appendChild(ciscoCard);
+  wrap.appendChild(grid);
+  return wrap;
+}
+
+function bubbleRowPreview(filledFirst){
+  const row = el('div',{class:'mini-bubble-row'});
+  ['A','B','C','D'].forEach((l,i)=>{
+    const b = el('div',{class:'mini-bubble' + ((filledFirst && i===1)||(!filledFirst && i===2) ? ' filled' : '')});
+    row.appendChild(b);
+  });
+  return row;
+}
+
+function ciscoPreviewSVG(){
+  return el('div',{html:`
+    <svg width="150" height="90" viewBox="0 0 150 90" fill="none">
+      <rect x="4" y="4" width="142" height="10" rx="3" fill="#153b27"/>
+      <rect x="4" y="20" width="90" height="6" rx="3" fill="#dfe6e0"/>
+      <rect x="4" y="20" width="30" height="6" rx="3" fill="#1b4d33"/>
+      <rect x="4" y="34" width="142" height="20" rx="4" fill="#f2f6f3" stroke="#dfe6e0"/>
+      <rect x="4" y="60" width="142" height="10" rx="3" fill="#fff" stroke="#dfe6e0"/>
+      <rect x="4" y="74" width="142" height="10" rx="3" fill="#fff" stroke="#dfe6e0"/>
+    </svg>
+  `});
+}
+
+function enterMode(mode){
+  state.screen = mode;
+  state.current = 0;
+  buildSessionBank();
+  startTimerForMode(mode);
+  render();
+}
+
+/* ============================================================
+   CISCO-STYLE EXAM
+============================================================ */
+function renderCisco(){
+  const bank = state.sessionBank;
+  const total = bank.length;
+  const answeredCount = Object.keys(state.answers).length;
+  const q = bank[state.current];
+  if(!q) return el('div',{class:'center-note'},'No question is available.');
+
+  const checkAnswerOn = state.settings.checkAnswerEnabled;
+
+  const wrap = el('div',{});
+
+  // progress
+  const pctTrack = el('div',{class:'progress-track'}, el('div',{class:'progress-fill', style:`width:${(answeredCount/total)*100}%`}));
+  wrap.appendChild(pctTrack);
+  wrap.appendChild(el('div',{class:'progress-label'}, `${answeredCount}/${total} answered`));
+
+  // overview
+  const ovCard = el('div',{class:'card overview-card'});
+  ovCard.appendChild(el('div',{class:'overview-title'},'QUESTION OVERVIEW'));
+  const grid = el('div',{class:'overview-grid'});
+  bank.forEach((qq, idx)=>{
+    const classes = ['ov-btn'];
+    if(idx === state.current) classes.push('current');
+    if(typeof state.answers[qq.id] !== 'undefined') classes.push('answered');
+    if(state.flags[qq.id]) classes.push('flagged');
+    grid.appendChild(el('button',{class:classes.join(' '), onclick:()=>{ state.current = idx; render(); }}, String(idx+1)));
+  });
+  ovCard.appendChild(grid);
+  wrap.appendChild(ovCard);
+
+  // question card
+  const qCard = el('div',{class:'card q-card'});
+  const topline = el('div',{class:'q-topline'},
+    el('div',{},
+      el('span',{class:'q-count'}, `Question ${state.current+1} of ${total}`),
+      el('span',{class:'id-badge'}, `id ${q.id}`)
+    ),
+    el('button',{class:'flag-btn' + (state.flags[q.id] ? ' on' : ''), title:'Flag this question', onclick:()=>{ state.flags[q.id] = !state.flags[q.id]; render(); }}, '⚑')
+  );
+  qCard.appendChild(topline);
+  qCard.appendChild(el('div',{class:'q-text'}, q.question));
+
+  const checked = checkAnswerOn && !!state.checked[q.id];
+  const selected = state.answers[q.id];
+
+  ['A','B','C','D'].forEach(letter=>{
+    const classes = ['option-row'];
+    if(selected === letter && !checked) classes.push('selected');
+    if(checked){
+      if(letter === q.answer) classes.push('correct');
+      else if(letter === selected) classes.push('incorrect');
+    }
+    const row = el('div',{class:classes.join(' '), onclick:()=>{ if(!checked){ state.answers[q.id] = letter; render(); } }},
+      el('div',{class:'opt-letter'}, letter),
+      el('div',{class:'opt-text'}, q.options[letter])
+    );
+    qCard.appendChild(row);
+  });
+
+  if(checked && q.insight){
+    qCard.appendChild(el('div',{class:'insight-box'}, `💡 ${q.insight}`));
+  }
+
+  const rightGroupChildren = [];
+  if(checkAnswerOn){
+    rightGroupChildren.push(el('button',{class:'btn btn-outline', disabled: (!selected || checked) ? true : null, onclick:()=>{ state.checked[q.id] = true; render(); }}, 'Check Answer'));
+  }
+  rightGroupChildren.push(
+    state.current < total - 1
+      ? el('button',{class:'btn btn-primary', onclick:()=>{ state.current++; render(); }}, 'Next →')
+      : el('button',{class:'btn btn-primary', onclick: finishQuiz}, 'Finish Quiz')
+  );
+
+  const actions = el('div',{class:'q-actions'},
+    el('button',{class:'btn btn-outline', disabled: state.current===0 ? true : null, onclick:()=>{ if(state.current>0){ state.current--; render(); } }}, '← Previous'),
+    el('div',{class:'right-group'}, ...rightGroupChildren)
+  );
+  qCard.appendChild(actions);
+
+  qCard.appendChild(el('div',{class:'kbd-hint'},
+    el('kbd',{},'A'),'–',el('kbd',{},'D'),' or ',el('kbd',{},'1'),'–',el('kbd',{},'4'),' select · ',
+    el('kbd',{},'Enter'),checkAnswerOn ? ' check / next · ' : ' next · ',el('kbd',{},'←'),el('kbd',{},'→'),' navigate · ',el('kbd',{},'F'),' flag'
+  ));
+
+  wrap.appendChild(qCard);
+  return wrap;
+}
+
+// keyboard shortcuts for cisco mode
+document.addEventListener('keydown', (e)=>{
+  if(state.screen !== 'exam-cisco') return;
+  const q = state.sessionBank[state.current];
+  if(!q) return;
+  const key = e.key.toUpperCase();
+  const letterMap = {'1':'A','2':'B','3':'C','4':'D','A':'A','B':'B','C':'C','D':'D'};
+  if(letterMap[key] && !state.checked[q.id]){
+    state.answers[q.id] = letterMap[key]; render(); return;
+  }
+  if(key === 'ENTER'){
+    const checkOn = state.settings.checkAnswerEnabled;
+    if(checkOn && !state.checked[q.id] && state.answers[q.id]){ state.checked[q.id] = true; render(); }
+    else if(!checkOn || state.checked[q.id]){
+      if(state.current < state.sessionBank.length - 1){ state.current++; render(); }
+      else { finishQuiz(); }
+    }
+    return;
+  }
+  if(e.key === 'ArrowLeft' && state.current > 0){ state.current--; render(); return; }
+  if(e.key === 'ArrowRight' && state.current < state.sessionBank.length-1){ state.current++; render(); return; }
+  if(key === 'F'){ state.flags[q.id] = !state.flags[q.id]; render(); return; }
+});
+
+/* ============================================================
+   PAPER / BUBBLE SHEET MODE
+============================================================ */
+function renderPaper(){
+  const bank = state.sessionBank;
+  const answeredCount = ()=> Object.keys(state.answers).length;
+
+  const shell = el('div',{class:'paper-shell'});
+
+  // Left: question paper
+  const paperPanel = el('div',{class:'card paper-panel'});
+  paperPanel.appendChild(el('div',{class:'paper-panel-head'},
+    el('span',{},'QUESTION PAPER'), el('span',{}, `${bank.length} items`)
+  ));
+  const paperBody = el('div',{class:'paper-panel-body'});
+  bank.forEach((q, idx)=>{
+    const item = el('div',{class:'qp-item'});
+    item.appendChild(el('div',{class:'qp-num'}, `${idx+1}.`));
+    item.appendChild(el('div',{class:'qp-text'}, q.question));
+    ['A','B','C','D'].forEach(letter=>{
+      item.appendChild(el('div',{class:'qp-opt'}, el('b',{}, letter+'.'), q.options[letter]));
+    });
+    paperBody.appendChild(item);
+  });
+  paperPanel.appendChild(paperBody);
+
+  // Right: bubble sheet
+  const sheetPanel = el('div',{class:'card sheet-panel'});
+  sheetPanel.appendChild(el('div',{class:'sheet-head'},
+    el('span',{},'ANSWER SHEET'), el('span',{},'A B C D')
+  ));
+  const shadedCountEl = el('span',{}, `${answeredCount()}/${bank.length} shaded`);
+  sheetPanel.appendChild(el('div',{class:'sheet-info'},
+    shadedCountEl,
+    el('span',{}, 'Tap a bubble to mark')
+  ));
+  const sheetBody = el('div',{class:'sheet-body'});
+  bank.forEach((q, idx)=>{
+    const row = el('div',{class:'bubble-row'});
+    row.appendChild(el('div',{class:'num'}, String(idx+1)));
+    const rowBubbles = [];
+    ['A','B','C','D'].forEach(letter=>{
+      const filled = state.answers[q.id] === letter;
+      const bubble = el('button',{class:'bubble' + (filled ? ' filled' : '')}, letter);
+      bubble.addEventListener('click', ()=>{
+        const wasAlreadyAnswered = typeof state.answers[q.id] !== 'undefined';
+        state.answers[q.id] = letter;
+        // targeted DOM update only — no full render() — so scroll position
+        // in the question paper and answer sheet panels is never disturbed
+        rowBubbles.forEach(b => b.classList.remove('filled'));
+        bubble.classList.add('filled');
+        if(!wasAlreadyAnswered){
+          const n = answeredCount();
+          shadedCountEl.textContent = `${n}/${bank.length} shaded`;
+          progressTxtEl.textContent = n < bank.length
+            ? `${bank.length - n} question${bank.length-n===1?'':'s'} left unshaded`
+            : 'All questions shaded — ready to submit';
+        }
+      });
+      rowBubbles.push(bubble);
+      row.appendChild(bubble);
+    });
+    sheetBody.appendChild(row);
+  });
+  sheetPanel.appendChild(sheetBody);
+
+  const footer = el('div',{class:'sheet-footer'});
+  const progressTxtEl = el('div',{class:'sheet-progress-txt'}, answeredCount() < bank.length
+    ? `${bank.length - answeredCount()} question${bank.length-answeredCount()===1?'':'s'} left unshaded`
+    : 'All questions shaded — ready to submit');
+  footer.appendChild(progressTxtEl);
+  footer.appendChild(el('button',{class:'btn btn-primary', style:'width:100%', onclick: finishQuiz}, 'Submit Answer Sheet'));
+  sheetPanel.appendChild(footer);
+
+  shell.appendChild(paperPanel);
+  shell.appendChild(sheetPanel);
+  return shell;
+}
+
+/* ============================================================
+   RESULTS
+============================================================ */
+function finishQuiz(){
+  stopTimer();
+  state.screen = 'results';
+  render();
+}
+
+function renderResults(){
+  const bank = state.sessionBank;
+  const total = bank.length;
+  let correct = 0;
+  bank.forEach(q=>{ if(state.answers[q.id] === q.answer) correct++; });
+  const pct = Math.round((correct/total)*100);
+
+  const wrap = el('div',{});
+
+  const scoreCard = el('div',{class:'card score-card'});
+  scoreCard.appendChild(el('div',{class:'score-num'}, `${correct}/${total}`));
+  scoreCard.appendChild(el('div',{class:'score-sub'}, `${pct}% correct`));
+  const barWrap = el('div',{class:'score-bar-wrap'},
+    el('div',{class:'progress-track'}, el('div',{class:'progress-fill', style:`width:${pct}%`}))
+  );
+  scoreCard.appendChild(barWrap);
+  wrap.appendChild(scoreCard);
+
+  bank.forEach((q, idx)=>{
+    const selected = state.answers[q.id];
+    const isCorrect = selected === q.answer;
+    const isSkipped = typeof selected === 'undefined';
+    const item = el('div',{class:'card review-item'});
+    const chip = isSkipped
+      ? el('span',{class:'status-chip skip'},'Skipped')
+      : isCorrect ? el('span',{class:'status-chip right'},'Correct') : el('span',{class:'status-chip wrong'},'Incorrect');
+    item.appendChild(el('div',{class:'review-top'},
+      el('div',{class:'review-q'}, `${idx+1}. ${q.question}`),
+      chip
+    ));
+    if(!isSkipped) item.appendChild(el('div',{class:'ans-line'}, el('b',{},'Your answer: '), `${selected}. ${q.options[selected]}`));
+    if(!isCorrect) item.appendChild(el('div',{class:'ans-line'}, el('b',{},'Correct answer: '), `${q.answer}. ${q.options[q.answer]}`));
+    if(q.insight) item.appendChild(el('div',{class:'insight-box'}, `💡 ${q.insight}`));
+    wrap.appendChild(item);
+  });
+
+  const actions = el('div',{class:'actions-row'},
+    el('button',{class:'btn btn-outline', onclick:()=>{ stopTimer(); state.answers={}; state.checked={}; state.current=0; state.screen='mode-select'; render(); }}, 'Retake this quiz'),
+    el('button',{class:'btn btn-primary', onclick: goHome}, 'Import a new quiz')
+  );
+  wrap.appendChild(actions);
+  return wrap;
+}
+
+/* ============================================================
+   INIT — restore last saved bank if present
+============================================================ */
+(async function init(){
+  loadDisplayPreferences();
+  render();
+  const saved = await loadSavedBank();
+  if(saved && state.screen === 'import'){
+    // offer resume banner
+    const card = document.querySelector('.import-card');
+    if(card){
+      const banner = el('div',{style:'margin-bottom:18px;background:var(--green-050);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;'},
+        el('span',{style:'font-size:13px;color:var(--fg-accent);'}, `Found a saved question bank (${saved.length} items) from your last session.`),
+        el('div',{style:'display:flex;gap:8px;'},
+          el('button',{class:'btn btn-primary', onclick:()=>startWithBank(saved)}, 'Resume'),
+          el('button',{class:'btn btn-text', onclick: async ()=>{ await clearSavedBank(); banner.remove(); }}, 'Dismiss')
+        )
+      );
+      card.insertBefore(banner, card.children[2]);
+    }
+  }
+})();
+</script>
+</body>
+</html>
